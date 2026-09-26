@@ -1,6 +1,7 @@
 // bigblow.js --- BigBlow JS file
 //
 // Copyright (C) 2011-2026 Fabrice Niessen. All rights reserved.
+// Time-stamp: <2026-09-27 Sun 01:30>
 //
 // This file is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -14,7 +15,6 @@
 //
 // Author: Fabrice Niessen <(concat "fniessen" at-sign "pirilampo.org")>
 // URL: https://github.com/fniessen/org-html-themes/
-// Version: 20140515.1841
 
 $(function() {
     $('p').
@@ -243,6 +243,34 @@ $(document).ready(function () {
         $(this).find('.snippet-copy-to-clipboard').hide();
     });
 
+    async function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return;
+            } catch (err) {
+                // Fall back when clipboard access is denied.
+            }
+        }
+
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+
+        try {
+            textArea.focus();
+            textArea.select();
+            if (!document.execCommand('copy')) {
+                throw new Error('The fallback copy command failed.');
+            }
+        } finally {
+            textArea.remove();
+        }
+    }
+
     // Copy source
     $(document).on('click', '.copy-to-clipboard-button', async function () {
         const preElement = $(this).closest('pre.src');
@@ -253,11 +281,13 @@ $(document).ready(function () {
         const text = clone.text();
 
         try {
-            await navigator.clipboard.writeText(text);
+            await copyText(text);
             $(this).text('[copied]');
             setTimeout(() => $(this).text('[copy]'), 1500);
         } catch (err) {
             console.error('Failed to copy:', err);
+            $(this).text('[failed]');
+            setTimeout(() => $(this).text('[copy]'), 1500);
         }
 
         $(this).closest('.snippet-copy-to-clipboard').hide();
