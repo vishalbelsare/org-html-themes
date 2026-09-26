@@ -227,13 +227,15 @@ $(document).ready(function() {
     $('table').stickyTableHeaders();
 });
 
-$(document).ready(function() {
-    // Add copy to clipboard snippets
-    $('.org-src-container pre.src').each(function() {
-        $(this).append('<div class="snippet-copy-to-clipboard"><span class="copy-to-clipboard-button">[copy]</span></div>');
+$(document).ready(function () {
+    // Add copy button to source blocks
+    $('.org-src-container pre.src').each(function () {
+        $(this).append(
+            '<div class="snippet-copy-to-clipboard"><span class="copy-to-clipboard-button">[copy]</span></div>'
+        );
     });
 
-    // Display/hide snippets on source block mouseenter/mouseleave
+    // Show/hide button
     $(document).on('mouseenter', '.org-src-container', function () {
         $(this).find('.snippet-copy-to-clipboard').show();
     });
@@ -241,27 +243,22 @@ $(document).ready(function() {
         $(this).find('.snippet-copy-to-clipboard').hide();
     });
 
-    $('.copy-to-clipboard-button').click( function() {
-        // Get the pre element
-        var preElement = $(this).closest('pre.src');
+    // Copy source
+    $(document).on('click', '.copy-to-clipboard-button', async function () {
+        const preElement = $(this).closest('pre.src');
 
-        // Clone it and remove the copy button from the clone
-        var clone = preElement.clone();
+        const clone = preElement.clone();
         clone.find('.snippet-copy-to-clipboard').remove();
 
-        // Get the text from the cleaned clone
-        var val = clone.text();
-        val = val.replace(/\n/g, "\r\n");
+        const text = clone.text();
 
-        var $copyElement = $("<textarea>");
-        $("body").append($copyElement);
-
-        $copyElement.val(val);
-
-        $copyElement.trigger('select');
-        document.execCommand('copy');
-
-        $copyElement.remove();
+        try {
+            await navigator.clipboard.writeText(text);
+            $(this).text('[copied]');
+            setTimeout(() => $(this).text('[copy]'), 1500);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
 
         $(this).closest('.snippet-copy-to-clipboard').hide();
     });

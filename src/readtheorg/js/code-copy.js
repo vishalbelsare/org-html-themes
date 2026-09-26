@@ -9,20 +9,25 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   codeBlocks.forEach((codeBlock) => {
-    // Create copy button.
-    const copyButton = document.createElement('button');
-    copyButton.className = 'copy-code-button';
-    copyButton.type = 'button';
-    copyButton.textContent = 'Copy';
-    copyButton.setAttribute('aria-label', 'Copy code to clipboard');
-
-    // Position the button.
+    // Position the button relative to the source block container.
     const container =
       codeBlock.closest('.org-src-container') || codeBlock.parentElement;
 
     if (!container) {
       return;
     }
+
+    // Prevent duplicate buttons if this script is initialized more than once.
+    if (container.querySelector(':scope > .copy-code-button')) {
+      return;
+    }
+
+    // Create copy button.
+    const copyButton = document.createElement('button');
+    copyButton.className = 'copy-code-button';
+    copyButton.type = 'button';
+    copyButton.textContent = 'Copy';
+    copyButton.setAttribute('aria-label', 'Copy code to clipboard');
 
     container.style.position = 'relative';
     container.appendChild(copyButton);
@@ -49,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * @returns {string}
  */
 function cleanCodeText(codeBlock) {
-  const codeText = codeBlock.textContent || codeBlock.innerText || '';
+  const codeText = codeBlock.textContent || '';
 
   return codeText
     .split('\n')
@@ -59,7 +64,8 @@ function cleanCodeText(codeBlock) {
 }
 
 /**
- * Copies text using the Clipboard API, with a fallback for older browsers.
+ * Copies text using the Clipboard API, with a fallback for older browsers
+ * or non-secure contexts.
  *
  * @param {string} text
  * @returns {Promise<void>}
@@ -88,14 +94,18 @@ function fallbackCopy(text) {
   textArea.style.left = '-9999px';
 
   document.body.appendChild(textArea);
-  textArea.select();
 
-  const successful = document.execCommand('copy');
+  try {
+    textArea.focus();
+    textArea.select();
 
-  document.body.removeChild(textArea);
+    const successful = document.execCommand('copy');
 
-  if (!successful) {
-    throw new Error('The fallback copy command failed.');
+    if (!successful) {
+      throw new Error('The fallback copy command failed.');
+    }
+  } finally {
+    textArea.remove();
   }
 }
 
@@ -110,9 +120,11 @@ function showCopyFeedback(button, success) {
 
   button.textContent = success ? 'Copied!' : 'Failed';
   button.classList.add(success ? 'copied' : 'failed');
+  button.disabled = true;
 
   window.setTimeout(() => {
     button.textContent = originalText;
     button.classList.remove('copied', 'failed');
+    button.disabled = false;
   }, 2000);
 }

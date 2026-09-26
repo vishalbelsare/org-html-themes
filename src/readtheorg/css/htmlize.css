@@ -619,7 +619,14 @@
 
 .org-org-verbatim {
     /* org-verbatim */
-    color: #7f7f7f;
+    color: #2c5a7a;
+    background: #e7f2fa;
+    border: 1px solid #7fbbe3;
+    border-radius: 4px;
+    padding: 2.4px 6px;
+    margin: auto 2px;
+    font-size: 80%;
+    font-weight: 700;
 }
 
 .org-org-verse {

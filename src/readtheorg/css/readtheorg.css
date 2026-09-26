@@ -367,12 +367,10 @@ dl dd {
 
 code {
     background: #fff;
-    border: solid 1px #e1e4e5;
-    /* color:#000;  for clickable code */
-    font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console",
-                 "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono",
-                 "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier,
-                 monospace;
+    border: 1px solid #e1e4e5;
+    color: #e74c3c;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas,
+                 "Liberation Mono", "Courier New", Courier, monospace;
     font-size: 75%;
     max-width: 100%;
     overflow-x: auto;
